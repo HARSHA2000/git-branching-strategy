@@ -1,0 +1,42 @@
+# This is a basic workflow that is manually triggered
+
+name: Manual workflow
+
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+on:
+  pull_request:
+    types: [closed]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # if: github.ref == 'refs/heads/release'
+    if: |
+      github.event.pull_request.base.ref == 'develop' &&
+      startsWith(github.event.pull_request.head.ref, 'feature/')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Print a message
+        run: echo "Build is running here."
+
+  deploy:
+    runs-on: ubuntu-latest
+    # if: github.ref == 'refs/heads/release'
+    if: |
+      github.event.pull_request.base.ref == 'develop' &&
+      startsWith(github.event.pull_request.head.ref, 'release/')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Print a message
+        run: echo "Tag creation happens here."
+      
+      - name: Print a message to show deployment
+        run: echo "Deploy to testing through terraform starts here."
+      
+      
