@@ -26,15 +26,28 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     # if: github.ref == 'refs/heads/release'
-    if: |
-      github.event.pull_request.base.ref == 'develop' &&
-      startsWith(github.event.pull_request.head.ref, 'release/')
+    # if: |
+    #   github.event.pull_request.base.ref == 'develop' &&
+    #   startsWith(github.event.pull_request.head.ref, 'release/')
+    needs: [build]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Print a message
-        run: echo "Tag creation happens here."
+      - name: Extract Tag Name
+        id: extract-tag
+        run: |
+          commit_message=$(git log --format=%B -n 1 ${{ github.sha }})
+          tag=$(echo "$commit_message" | grep -oP '(?<=\[tag:).*?(?=\])' || true)
+          echo "::set-output name=tag::$tag"
+
+      - name: create a tag
+        if: steps.extract-tag.outputs.tag != ''
+        run: |
+          git tag ${{ steps.extract-tag.outputs.tag }}
+          git push origin ${{ steps.extract-tag.outputs.tag }}
+
+        # run: echo "Tag creation happens here."
       
       - name: Print a message to show deployment
         run: echo "Deploy to testing through terraform starts here."
