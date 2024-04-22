@@ -9,3 +9,5 @@ git-branching-strategy
 3. Everyone should use prefixes namely : 'fix', 'hotfix' or 'feat' for identifying the merge so that the versioning can be implemented easily.
 fix or hotfix: increase the patch
 feat: increase the minor or major based on #message(messages: 'major' and 'minor').
+
+minor change test.
