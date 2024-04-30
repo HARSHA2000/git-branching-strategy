@@ -13,7 +13,7 @@ jobs:
         image: postgres:latest
         env:
           POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
+          POSTGRES_PASSWORD: test_password  # Set the PostgreSQL password
           POSTGRES_DB: test_db
         ports:
           - 5432:5432
@@ -23,6 +23,8 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Backup PostgreSQL Database
+        env:
+          PGPASSWORD: ${{ secrets.POSTGRES_TEST_PASSWORD }}
         run: |
           pg_dump -h localhost -U test_user -d test_db -F c -b -v -f "backup.pgsql"
       
