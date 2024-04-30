@@ -8,28 +8,24 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
     services:
       postgres:
         image: postgres:latest
         env:
           POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password
+          POSTGRES_PASSWORD: test_password  # Correctly set the password here
           POSTGRES_DB: test_db
         ports:
-          - 5432:5432  # Expose the PostgreSQL port
-        options: >-  # Additional options, if needed
-          --health-cmd "pg_isready -U test_user"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          - 5432:5432  # PostgreSQL default port
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      # Add your test steps here
       - name: Test with PostgreSQL
+        env:
+          PGPASSWORD: ${{ secrets.POSTGRES_TEST_PASSWORD }}  # Use GitHub Actions secrets to securely provide the password
         run: |
-          # Connect to PostgreSQL and run tests
-          psql -h localhost -U test_user -d test_db -c "SELECT 'hello world';"
+          # Test database connection with the correct password
+          psql -h localhost -U test_user -d test_db -c "SELECT 'Connection successful!';"
+
