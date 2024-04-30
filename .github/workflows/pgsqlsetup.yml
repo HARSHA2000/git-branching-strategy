@@ -13,25 +13,35 @@ jobs:
         image: postgres:latest
         env:
           POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password  # Set the PostgreSQL password
+          POSTGRES_PASSWORD: test_password  # Ensure correct password
           POSTGRES_DB: test_db
         ports:
-          - 5432:5432
+          - 5432:5432  # Expose the correct port
+        options: >-  # Optional, for better resilience
+          --health-cmd "pg_isready -U test_user"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Backup PostgreSQL Database
+      - name: Wait for PostgreSQL to be Ready
+        run: |
+          # Ensure PostgreSQL service is ready before connecting
+          until pg_isready -h localhost -U test_user; do
+            echo "Waiting for PostgreSQL..."
+            sleep 5
+          done
         env:
           PGPASSWORD: ${{ secrets.POSTGRES_TEST_PASSWORD }}
+
+      - name: Backup PostgreSQL Database
+        env:
+          PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}  # Ensure correct password is set
         run: |
           pg_dump -h localhost -U test_user -d test_db -F c -b -v -f "backup.pgsql"
-      
-      - name: Upload Backup as Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: postgres_backup
-          path: "backup.pgsql"
+
 
 
