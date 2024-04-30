@@ -1,0 +1,38 @@
+name: Test Workflow with PostgreSQL
+on:
+  push:
+    branches:
+      - develop  # Change as needed
+  pull_request:
+    types: [closed]
+    branches:
+      - develop  # Change as needed
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:latest
+        env:
+          POSTGRES_USER: test_user
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: test_db
+        ports:
+          - 5432:5432  # Expose the PostgreSQL port
+        options: >-  # Additional options, if needed
+          --health-cmd "pg_isready -U test_user"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Add your test steps here
+      - name: Test with PostgreSQL
+        run: |
+          # Connect to PostgreSQL and run tests
+          psql -h localhost -U test_user -d test_db -c "SELECT 'hello world';"
