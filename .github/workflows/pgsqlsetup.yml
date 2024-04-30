@@ -27,6 +27,11 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
+      - name: Install PostgreSQL Client Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client-16  # Install the correct PostgreSQL client version
+          
       - name: Wait for PostgreSQL to be Ready
         run: |
           # Ensure PostgreSQL service is ready before connecting
