@@ -1,12 +1,9 @@
 name: Test Workflow with PostgreSQL
 on:
-  push:
-    branches:
-      - develop  # Change as needed
   pull_request:
     types: [closed]
     branches:
-      - develop  # Change as needed
+      - develop
 
 jobs:
   test:
