@@ -39,7 +39,7 @@ jobs:
 
       - name: Backup PostgreSQL Database
         env:
-          PGPASSWORD: ${{ secrets.POSTGRES_PASSWORD }}  # Ensure correct password is set
+          PGPASSWORD: ${{ secrets.POSTGRES_TEST_PASSWORD }}  # Ensure correct password is set
         run: |
           pg_dump -h localhost -U test_user -d test_db -F c -b -v -f "backup.pgsql"
 
