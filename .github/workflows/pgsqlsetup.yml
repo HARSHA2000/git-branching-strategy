@@ -12,13 +12,12 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_USER: test_user
-          POSTGRES_PASSWORD: test_password  # Ensure correct password
-          POSTGRES_DB: test_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
         ports:
           - 5432:5432  # Expose the correct port
         options: >-  # Optional, for better resilience
-          --health-cmd "pg_isready -U test_user"
+          --health-cmd "pg_isready -U postgres"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -27,26 +26,28 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v3
 
-      - name: Install PostgreSQL Client Tools
+      - name: Wait for PostgreSQL
         run: |
-          sudo apt-get update
-          sudo apt-get install -y postgresql-client-16  # Install the correct PostgreSQL client version
-          
-      - name: Wait for PostgreSQL to be Ready
-        run: |
-          # Ensure PostgreSQL service is ready before connecting
-          until pg_isready -h localhost -U test_user; do
+          until pg_isready -h localhost -U postgres; do
             echo "Waiting for PostgreSQL..."
-            sleep 5
+            sleep 5  # Adjust as needed
           done
         env:
-          PGPASSWORD: ${{ secrets.POSTGRES_TEST_PASSWORD }}
+          PGPASSWORD: postgres  # PostgreSQL password
 
+      - name: Connect to PostgreSQL and Create Database
+        env:
+          PGPASSWORD: postgres  # Use GitHub Secrets for secure password handling
+        run: |
+          # Connect to PostgreSQL server and create a new database
+          psql -h localhost -U postgres -c "CREATE DATABASE new_db;"
+          
       - name: Backup PostgreSQL Database
         env:
-          PGPASSWORD: ${{ secrets.POSTGRES_TEST_PASSWORD }}  # Ensure correct password is set
+          PGPASSWORD: postgres
         run: |
-          pg_dump -h localhost -U test_user -d test_db -F c -b -v -f "backup.pgsql"
+          pg_dump -h localhost -U postgres -d new_db -F c -b -v -f "backup.pgsql"
+
 
 
 
